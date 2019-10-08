@@ -1,0 +1,35 @@
+{
+    "name": "chebur/daemon-command",
+    "type": "library",
+    "description": "Daemon (endless) symfony command",
+    "keywords": [
+        "symfony",
+        "symfony2",
+        "symfony3",
+        "symfony4",
+        "command",
+        "daemon",
+        "loop",
+        "endless"
+    ],
+    "homepage": "https://github.com/vchebotarev",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vladimir Chebotarev",
+            "homepage": "http://github.com/vchebotarev",
+            "email": "v.yu.chebotarev@mail.ru"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "Chebur\\DaemonCommand\\": "" }
+    },
+    "require": {
+        "php": "^7.1",
+        "chebur/memory-limit-bytes": "^0.0.1",
+        "symfony/console": "^3.4 || ^4.0"
+    },
+    "suggest": {
+        "ext-pcntl": "*"
+    }
+}
