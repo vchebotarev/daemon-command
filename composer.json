@@ -27,6 +27,7 @@
     "require": {
         "php": "^7.1",
         "chebur/memory-limit-bytes": "^0.0.1",
+        "dragonmantank/cron-expression": "^2.3",
         "symfony/console": "^3.4 || ^4.0"
     },
     "suggest": {
