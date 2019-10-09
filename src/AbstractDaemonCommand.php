@@ -121,8 +121,11 @@ abstract class AbstractDaemonCommand extends Command
 
     protected function pause(int $seconds, ExecutionContext $context): void
     {
-        if ($seconds <= 0) {
+        if ($seconds < 0) {
             throw new InvalidArgumentException('Pause time argument value should be greater than 0');
+        }
+        if ($seconds === 0) {
+            return;
         }
         sleep($seconds);
         $context->increaseTotalPauseTime($seconds);
