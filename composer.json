@@ -22,7 +22,9 @@
         }
     ],
     "autoload": {
-        "psr-4": { "Chebur\\DaemonCommand\\": "" }
+        "psr-4": {
+            "Chebur\\DaemonCommand\\": "src"
+        }
     },
     "require": {
         "php": "^7.1",
