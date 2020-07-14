@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Chebur\DaemonCommand;
 
 use Symfony\Component\Console\Input\InputInterface;
