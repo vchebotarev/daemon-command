@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chebur\DaemonCommand;
 
+use Cron\CronExpression;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -45,6 +46,11 @@ class ExecutionContext
     private $iterationsLimit;
 
     /**
+     * @var CronExpression|null
+     */
+    private $schedule;
+
+    /**
      * @var float
      */
     private $timeStart;
@@ -65,7 +71,8 @@ class ExecutionContext
         int $pause,
         int $memoryLimit,
         ?int $timeLimit,
-        ?int $iterationsLimit
+        ?int $iterationsLimit,
+        ?CronExpression $schedule = null
     ) {
         $this->input = $input;
         $this->output = $output;
@@ -74,6 +81,7 @@ class ExecutionContext
         $this->memoryLimit = $memoryLimit;
         $this->timeLimit = $timeLimit;
         $this->iterationsLimit = $iterationsLimit;
+        $this->schedule = $schedule;
 
         $this->timeStart = microtime(true);
     }
@@ -116,6 +124,11 @@ class ExecutionContext
     public function getLimitIterations(): ?int
     {
         return $this->iterationsLimit;
+    }
+
+    public function getSchedule(): ?CronExpression
+    {
+        return $this->schedule;
     }
 
     public function getMemoryLimit(): int

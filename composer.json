@@ -1,13 +1,15 @@
 {
     "name": "chebur/daemon-command",
     "type": "library",
-    "description": "Daemon (endless) symfony command",
+    "description": "Daemon (endless) symfony command which supports scheduled (cron like) code execution",
     "keywords": [
         "symfony",
         "command",
         "daemon",
         "loop",
-        "endless"
+        "endless",
+        "cron",
+        "schedule"
     ],
     "homepage": "https://github.com/vchebotarev",
     "license": "MIT",
@@ -26,6 +28,7 @@
     "require": {
         "php": "^7.2.5",
         "chebur/memory-limit-bytes": "^0.0.1",
+        "dragonmantank/cron-expression": "^3.0",
         "symfony/console": "^4.4 || ^5.0"
     },
     "suggest": {

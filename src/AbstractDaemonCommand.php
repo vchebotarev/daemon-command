@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chebur\DaemonCommand;
 
 use BadFunctionCallException;
+use Cron\CronExpression;
 use InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,6 +20,7 @@ abstract class AbstractDaemonCommand extends Command
         $this->addOption('memory', 'm', InputOption::VALUE_OPTIONAL, 'Memory limit in megabytes', -1);
         $this->addOption('time', 't', InputOption::VALUE_OPTIONAL, 'Time limit in seconds');
         $this->addOption('iterations', 'i', InputOption::VALUE_OPTIONAL, 'Iterations limit');
+        $this->addOption('schedule', 's', InputOption::VALUE_OPTIONAL, 'Schedule cron expression');
     }
 
     abstract protected function executeIteration(ExecutionContext $context): void;
@@ -39,6 +41,15 @@ abstract class AbstractDaemonCommand extends Command
         $this->registerSignals($context);
         $this->beforeCycle($context);
         while(true) {
+            if ($context->getSchedule() !== null) {
+                $nextRun = $context->getSchedule()->getNextRunDate();
+                while ($nextRun->getTimestamp() - time() > 0) {
+                    if ($context->isStopAsap()) {
+                        break 2;
+                    }
+                    sleep(1);
+                }
+            }
             $this->executeIteration($context);
             $context->incrementIterations();
             if ($this->checkStop($context)) {
@@ -83,13 +94,17 @@ abstract class AbstractDaemonCommand extends Command
             throw new InvalidArgumentException('Iterations limit option value should be greater than 0');
         }
 
+        $schedule = $input->getOption('schedule');
+        $schedule = $schedule === null ? $schedule : CronExpression::factory($schedule);
+
         return new ExecutionContext(
             $input,
             $output,
             $pause,
             $memoryLimit,
             $timeLimit,
-            $iterationsLimit
+            $iterationsLimit,
+            $schedule
         );
     }
 
