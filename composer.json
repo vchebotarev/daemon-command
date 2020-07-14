@@ -27,7 +27,7 @@
         }
     },
     "require": {
-        "php": "^7.1",
+        "php": "^7.2.5",
         "chebur/memory-limit-bytes": "^0.0.1",
         "symfony/console": "^3.4 || ^4.0"
     },
