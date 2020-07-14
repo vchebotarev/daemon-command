@@ -4,9 +4,6 @@
     "description": "Daemon (endless) symfony command",
     "keywords": [
         "symfony",
-        "symfony2",
-        "symfony3",
-        "symfony4",
         "command",
         "daemon",
         "loop",
