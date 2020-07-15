@@ -121,6 +121,13 @@ abstract class AbstractDaemonCommand extends Command
 
     private function checkStop(ExecutionContext $context): bool
     {
+        if (extension_loaded('pcntl') ) {
+            if (!function_exists('pcntl_signal_dispatch')) {
+                throw new BadFunctionCallException("Function 'pcntl_signal_dispatch' is referenced in the php.ini 'disable_functions' and can't be called.");
+            }
+            pcntl_signal_dispatch();
+        }
+
         if ($context->isStopAsap()) {
             return true;
         }
