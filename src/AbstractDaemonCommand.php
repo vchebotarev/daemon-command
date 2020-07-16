@@ -44,7 +44,7 @@ abstract class AbstractDaemonCommand extends Command
             if ($context->getSchedule() !== null) {
                 $nextRun = $context->getSchedule()->getNextRunDate();
                 while ($nextRun->getTimestamp() - time() > 0) {
-                    if ($context->isStopAsap()) {
+                    if ($this->checkStop($context)) {
                         break 2;
                     }
                     sleep(1);
