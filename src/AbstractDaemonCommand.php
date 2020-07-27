@@ -35,7 +35,7 @@ abstract class AbstractDaemonCommand extends Command
 
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $context = $this->buildContext($input, $output);
         $this->registerSignals($context);
@@ -65,6 +65,8 @@ abstract class AbstractDaemonCommand extends Command
         }
         $output->writeln('<info>Memory usage:</info> '. round(memory_get_usage(true) / 1024 / 1024, 3) . 'MB');
         $output->writeln('<info>Iterations count:</info> '. $context->getIterationsCount());
+
+        return 0;
     }
 
     private function buildContext(InputInterface $input, OutputInterface $output): ExecutionContext
