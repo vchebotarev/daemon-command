@@ -39,6 +39,11 @@ abstract class AbstractDaemonCommand extends Command
 
     }
 
+    protected function afterIteration(ExecutionContext $context, bool $isLastIteration): void
+    {
+        // f.e. doctrine entity manager clear() call
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $context = $this->buildContext($input, $output);
@@ -57,6 +62,7 @@ abstract class AbstractDaemonCommand extends Command
             $this->executeIteration($context);
             $context->incrementIterations();
             $checkStop = $this->checkStop($context);
+            $this->afterIteration($context, $checkStop);
             if ($this->eventDispatcher !== null) {
                 $this->eventDispatcher->dispatch(new AfterIterationEvent(
                     $this,
