@@ -18,7 +18,7 @@ abstract class AbstractDaemonCommand extends Command
 {
     protected ?EventDispatcherInterface $eventDispatcher;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addOption('pause', 'p', InputOption::VALUE_OPTIONAL, 'Pause between iterations in seconds', 0);
         $this->addOption('memory', 'm', InputOption::VALUE_OPTIONAL, 'Memory limit in megabytes', -1);
@@ -63,13 +63,11 @@ abstract class AbstractDaemonCommand extends Command
             $context->incrementIterations();
             $checkStop = $this->checkStop($context);
             $this->afterIteration($context, $checkStop);
-            if ($this->eventDispatcher !== null) {
-                $this->eventDispatcher->dispatch(new AfterIterationEvent(
-                    $this,
-                    $context,
-                    $checkStop,
-                ));
-            }
+            $this->eventDispatcher?->dispatch(new AfterIterationEvent(
+                $this,
+                $context,
+                $checkStop,
+            ));
             if ($checkStop) {
                 break;
             }
@@ -124,7 +122,7 @@ abstract class AbstractDaemonCommand extends Command
             $memoryLimit,
             $timeLimit,
             $iterationsLimit,
-            $schedule
+            $schedule,
         );
     }
 
@@ -134,8 +132,8 @@ abstract class AbstractDaemonCommand extends Command
             if (!function_exists('pcntl_signal')) {
                 throw new BadFunctionCallException("Function 'pcntl_signal' is referenced in the php.ini 'disable_functions' and can't be called.");
             }
-            pcntl_signal(SIGTERM, [$context, 'stopAsap']);
-            pcntl_signal(SIGINT, [$context, 'stopAsap']);
+            pcntl_signal(SIGTERM, $context->stopAsap(...));
+            pcntl_signal(SIGINT, $context->stopAsap(...));
         }
     }
 
