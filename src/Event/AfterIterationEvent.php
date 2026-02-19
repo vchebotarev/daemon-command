@@ -10,20 +10,11 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class AfterIterationEvent extends Event
 {
-    private AbstractDaemonCommand $command;
-
-    private ExecutionContext $executionContext;
-
-    private bool $isLastIteration;
-
     public function __construct(
-        AbstractDaemonCommand $command,
-        ExecutionContext $executionContext,
-        bool $isLastIteration = false
+        public readonly AbstractDaemonCommand $command,
+        public readonly ExecutionContext $executionContext,
+        public readonly bool $isLastIteration = false,
     ) {
-        $this->command = $command;
-        $this->executionContext = $executionContext;
-        $this->isLastIteration = $isLastIteration;
     }
 
     public function getCommand(): AbstractDaemonCommand
