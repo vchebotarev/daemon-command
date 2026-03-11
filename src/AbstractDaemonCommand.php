@@ -16,7 +16,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractDaemonCommand extends Command
 {
-    protected ?EventDispatcherInterface $eventDispatcher;
+    protected ?EventDispatcherInterface $eventDispatcher = null;
 
     protected function configure()
     {
