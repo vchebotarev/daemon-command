@@ -18,12 +18,12 @@ class ExecutionContextTest extends TestCase
         $output = new NullOutput();
         $schedule = new CronExpression('* * * * *');
 
-        $context = new ExecutionContext($input, $output, 5, 128 * 1024 * 1024, 60, 10, $schedule);
+        $context = new ExecutionContext($input, $output, 5, 128, 60, 10, $schedule);
 
         self::assertSame($input, $context->getInput());
         self::assertSame($output, $context->getOutput());
         self::assertSame(5, $context->getPauseBetweenIterations());
-        self::assertSame(128 * 1024 * 1024, $context->getMemoryLimit());
+        self::assertSame(128, $context->getMemoryLimit());
         self::assertSame(60, $context->getLimitTime());
         self::assertSame(10, $context->getLimitIterations());
         self::assertSame($schedule, $context->getSchedule());
@@ -34,12 +34,13 @@ class ExecutionContextTest extends TestCase
 
     public function testConstructorDefaultsWithoutSchedule(): void
     {
-        $context = new ExecutionContext(new ArrayInput([]), new NullOutput(), 0, -1, null, null);
+        $context = new ExecutionContext(new ArrayInput([]), new NullOutput(), null, null, null, null);
 
         self::assertNull($context->getSchedule());
         self::assertNull($context->getLimitTime());
         self::assertNull($context->getLimitIterations());
-        self::assertSame(-1, $context->getMemoryLimit());
+        self::assertNull($context->getPauseBetweenIterations());
+        self::assertNull($context->getMemoryLimit());
     }
 
     public function testIncrementIterations(): void
@@ -87,6 +88,6 @@ class ExecutionContextTest extends TestCase
 
     private function createContext(): ExecutionContext
     {
-        return new ExecutionContext(new ArrayInput([]), new NullOutput(), 0, -1, null, null);
+        return new ExecutionContext(new ArrayInput([]), new NullOutput(), null, null, null, null);
     }
 }

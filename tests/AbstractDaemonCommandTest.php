@@ -14,25 +14,64 @@ class AbstractDaemonCommandTest extends TestCase
     public function testPauseOptionRejectsNegativeValue(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Pause time option value should be greater than or equal to 0');
+        $this->expectExceptionMessage('Pause time option value should be greater than 0');
 
         $this->executeCommand(['--pause' => '-1', '--iterations' => '1']);
+    }
+
+    public function testPauseOptionRejectsZero(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Pause time option value should be greater than 0');
+
+        $this->executeCommand(['--pause' => '0', '--iterations' => '1']);
     }
 
     public function testMemoryOptionRejectsZero(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Memory limit option value should be greater than 0 or equal to -1');
+        $this->expectExceptionMessage('Memory limit option value should be greater than 0');
 
         $this->executeCommand(['--memory' => '0', '--iterations' => '1']);
     }
 
-    public function testMemoryOptionRejectsLessThanMinusOne(): void
+    public function testMemoryOptionRejectsNegativeValue(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Memory limit option value should be greater than 0 or equal to -1');
+        $this->expectExceptionMessage('Memory limit option value should be greater than 0');
 
         $this->executeCommand(['--memory' => '-2', '--iterations' => '1']);
+    }
+
+    /**
+     * @dataProvider nonIntegerOptionProvider
+     */
+    public function testIntegerOptionsRejectNonIntegerValues(string $option, string $value): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(sprintf('Option "%s" expects an integer', $option));
+
+        $input = [$option => $value];
+        if ($option !== '--iterations') {
+            $input['--iterations'] = '1';
+        }
+
+        $this->executeCommand($input);
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function nonIntegerOptionProvider(): iterable
+    {
+        yield 'pause letters' => ['--pause', 'abc'];
+        yield 'pause float' => ['--pause', '1.5'];
+        yield 'memory letters' => ['--memory', 'abc'];
+        yield 'memory float' => ['--memory', '1.9'];
+        yield 'time letters' => ['--time', 'abc'];
+        yield 'time float' => ['--time', '2.5'];
+        yield 'iterations letters' => ['--iterations', 'abc'];
+        yield 'iterations float' => ['--iterations', '3.1'];
     }
 
     public function testTimeOptionRejectsZero(): void

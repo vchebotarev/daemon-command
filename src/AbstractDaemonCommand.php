@@ -16,11 +16,11 @@ abstract class AbstractDaemonCommand extends Command
 {
     protected function configure(): void
     {
-        $this->addOption('pause', 'p', InputOption::VALUE_OPTIONAL, 'Pause between iterations in seconds', 0);
-        $this->addOption('memory', 'm', InputOption::VALUE_OPTIONAL, 'Memory limit in megabytes', -1);
-        $this->addOption('time', 't', InputOption::VALUE_OPTIONAL, 'Time limit in seconds');
-        $this->addOption('iterations', 'i', InputOption::VALUE_OPTIONAL, 'Iterations limit');
-        $this->addOption('schedule', 's', InputOption::VALUE_OPTIONAL, 'Schedule cron expression');
+        $this->addOption('pause', 'p', InputOption::VALUE_REQUIRED, 'Pause between iterations in seconds');
+        $this->addOption('memory', 'm', InputOption::VALUE_REQUIRED, 'Memory limit in megabytes');
+        $this->addOption('time', 't', InputOption::VALUE_REQUIRED, 'Time limit in seconds');
+        $this->addOption('iterations', 'i', InputOption::VALUE_REQUIRED, 'Iterations limit');
+        $this->addOption('schedule', 's', InputOption::VALUE_REQUIRED, 'Schedule cron expression');
     }
 
     abstract protected function executeIteration(ExecutionContext $context): void;
@@ -60,7 +60,9 @@ abstract class AbstractDaemonCommand extends Command
             if ($checkStop) {
                 break;
             }
-            $this->pause($context->getPauseBetweenIterations(), $context);
+            if ($context->getPauseBetweenIterations() !== null) {
+                $this->pause($context->getPauseBetweenIterations(), $context);
+            }
         }
         $this->afterCycle($context);
 
@@ -76,27 +78,27 @@ abstract class AbstractDaemonCommand extends Command
 
     private function buildContext(InputInterface $input, OutputInterface $output): ExecutionContext
     {
-        $pause = (int) $input->getOption('pause');
-        if ($pause < 0) {
-            throw new InvalidArgumentException('Pause time option value should be greater than or equal to 0');
-        }
-        $memoryLimit = (int) $input->getOption('memory');
-        $memoryLimit = $memoryLimit === -1 ? $memoryLimit : $memoryLimit * 1024 * 1024;
-        if ($memoryLimit === 0 || $memoryLimit < -1) {
-            throw new InvalidArgumentException('Memory limit option value should be greater than 0 or equal to -1');
-        }
-        if ($memoryLimit > memory_limit_bytes()) {
-            throw new InvalidArgumentException('Memory limit option value should not be greater than "memory_limit" in the php.ini (' . memory_limit() . ')');
+        $pause = $this->getIntOption($input, 'pause');
+        if ($pause !== null && $pause <= 0) {
+            throw new InvalidArgumentException('Pause time option value should be greater than 0');
         }
 
-        $timeLimit = $input->getOption('time');
-        $timeLimit = $timeLimit === null ? null : (int) $timeLimit;
+        $memoryLimit = $this->getIntOption($input, 'memory');
+        if ($memoryLimit !== null) {
+            if ($memoryLimit <= 0) {
+                throw new InvalidArgumentException('Memory limit option value should be greater than 0');
+            }
+            if (memory_limit_bytes() !== -1 && $memoryLimit * 1024 * 1024 > memory_limit_bytes()) {
+                throw new InvalidArgumentException('Memory limit option value should not be greater than "memory_limit" in the php.ini (' . memory_limit() . ')');
+            }
+        }
+
+        $timeLimit = $this->getIntOption($input, 'time');
         if ($timeLimit !== null && $timeLimit <= 0) {
             throw new InvalidArgumentException('Time limit option value should be greater than 0');
         }
 
-        $iterationsLimit = $input->getOption('iterations');
-        $iterationsLimit = $iterationsLimit === null ? null : (int) $iterationsLimit;
+        $iterationsLimit = $this->getIntOption($input, 'iterations');
         if ($iterationsLimit !== null && $iterationsLimit <= 0) {
             throw new InvalidArgumentException('Iterations limit option value should be greater than 0');
         }
@@ -113,6 +115,25 @@ abstract class AbstractDaemonCommand extends Command
             iterationsLimit: $iterationsLimit,
             schedule: $schedule,
         );
+    }
+
+    private function getIntOption(InputInterface $input, string $name): ?int
+    {
+        $value = $input->getOption($name);
+        if ($value === null) {
+            return null;
+        }
+
+        $filtered = filter_var($value, FILTER_VALIDATE_INT);
+        if ($filtered === false) {
+            throw new InvalidArgumentException(sprintf(
+                'Option "--%s" expects an integer, got "%s".',
+                $name,
+                is_scalar($value) ? (string) $value : get_debug_type($value),
+            ));
+        }
+
+        return $filtered;
     }
 
     private function registerSignals(ExecutionContext $context): void
@@ -144,7 +165,7 @@ abstract class AbstractDaemonCommand extends Command
         if ($context->getLimitTime() !== null && $context->getExecutionTime() >= $context->getLimitTime()) {
             return true;
         }
-        if ($context->getMemoryLimit() !== -1 && memory_get_usage(true) >= $context->getMemoryLimit()) {
+        if ($context->getMemoryLimit() !== null && memory_get_usage(true) >= $context->getMemoryLimit() * 1024 * 1024) {
             return true;
         }
         return false;
@@ -152,11 +173,8 @@ abstract class AbstractDaemonCommand extends Command
 
     protected function pause(int $seconds, ExecutionContext $context): void
     {
-        if ($seconds < 0) {
-            throw new InvalidArgumentException('Pause time argument value should be greater than or equal to 0');
-        }
-        if ($seconds === 0) {
-            return;
+        if ($seconds <= 0) {
+            throw new InvalidArgumentException('Pause time argument value should be greater than 0');
         }
         sleep($seconds);
         $context->increaseTotalPauseTime($seconds);

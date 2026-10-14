@@ -21,8 +21,8 @@ class ExecutionContext
     public function __construct(
         private readonly InputInterface $input,
         private readonly OutputInterface $output,
-        private readonly int $pause,
-        private readonly int $memoryLimit,
+        private readonly ?int $pause,
+        private readonly ?int $memoryLimit,
         private readonly ?int $timeLimit,
         private readonly ?int $iterationsLimit,
         private readonly ?CronExpression $schedule = null,
@@ -75,7 +75,7 @@ class ExecutionContext
         return $this->schedule;
     }
 
-    public function getMemoryLimit(): int
+    public function getMemoryLimit(): ?int
     {
         return $this->memoryLimit;
     }
@@ -95,7 +95,7 @@ class ExecutionContext
         return $this->stopAsap;
     }
 
-    public function getPauseBetweenIterations(): int
+    public function getPauseBetweenIterations(): ?int
     {
         return $this->pause;
     }
