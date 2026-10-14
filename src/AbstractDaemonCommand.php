@@ -5,19 +5,15 @@ declare(strict_types=1);
 namespace Chebur\DaemonCommand;
 
 use BadFunctionCallException;
-use Chebur\DaemonCommand\Event\AfterIterationEvent;
 use Cron\CronExpression;
 use InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractDaemonCommand extends Command
 {
-    protected ?EventDispatcherInterface $eventDispatcher = null;
-
     protected function configure()
     {
         $this->addOption('pause', 'p', InputOption::VALUE_OPTIONAL, 'Pause between iterations in seconds', 0);
@@ -63,13 +59,6 @@ abstract class AbstractDaemonCommand extends Command
             $context->incrementIterations();
             $checkStop = $this->checkStop($context);
             $this->afterIteration($context, $checkStop);
-            if ($this->eventDispatcher !== null) {
-                $this->eventDispatcher->dispatch(new AfterIterationEvent(
-                    $this,
-                    $context,
-                    $checkStop,
-                ));
-            }
             if ($checkStop) {
                 break;
             }
