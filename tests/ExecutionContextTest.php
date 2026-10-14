@@ -16,7 +16,7 @@ class ExecutionContextTest extends TestCase
     {
         $input = new ArrayInput([]);
         $output = new NullOutput();
-        $schedule = CronExpression::factory('* * * * *');
+        $schedule = new CronExpression('* * * * *');
 
         $context = new ExecutionContext($input, $output, 5, 128 * 1024 * 1024, 60, 10, $schedule);
 

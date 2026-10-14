@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class AbstractDaemonCommand extends Command
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->addOption('pause', 'p', InputOption::VALUE_OPTIONAL, 'Pause between iterations in seconds', 0);
         $this->addOption('memory', 'm', InputOption::VALUE_OPTIONAL, 'Memory limit in megabytes', -1);
@@ -27,12 +27,10 @@ abstract class AbstractDaemonCommand extends Command
 
     protected function beforeCycle(ExecutionContext $context): void
     {
-
     }
 
     protected function afterCycle(ExecutionContext $context): void
     {
-
     }
 
     protected function afterIteration(ExecutionContext $context, bool $isLastIteration): void
@@ -45,7 +43,7 @@ abstract class AbstractDaemonCommand extends Command
         $context = $this->buildContext($input, $output);
         $this->registerSignals($context);
         $this->beforeCycle($context);
-        while(true) {
+        while (true) {
             if ($context->getSchedule() !== null) {
                 $nextRun = $context->getSchedule()->getNextRunDate();
                 while ($nextRun->getTimestamp() - time() > 0) {
@@ -68,52 +66,52 @@ abstract class AbstractDaemonCommand extends Command
 
         $output->writeln('<info>Total execution time:</info> ' . $context->getExecutionTime() . 's');
         if ($context->getTotalPauseTime()) {
-            $output->writeln('<info>Total pause time:</info> '. $context->getTotalPauseTime() . 's');
+            $output->writeln('<info>Total pause time:</info> ' . $context->getTotalPauseTime() . 's');
         }
-        $output->writeln('<info>Memory usage:</info> '. round(memory_get_usage(true) / 1024 / 1024, 3) . 'MB');
-        $output->writeln('<info>Iterations count:</info> '. $context->getIterationsCount());
+        $output->writeln('<info>Memory usage:</info> ' . round(memory_get_usage(true) / 1024 / 1024, 3) . 'MB');
+        $output->writeln('<info>Iterations count:</info> ' . $context->getIterationsCount());
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     private function buildContext(InputInterface $input, OutputInterface $output): ExecutionContext
     {
-        $pause = (int)$input->getOption('pause');
+        $pause = (int) $input->getOption('pause');
         if ($pause < 0) {
             throw new InvalidArgumentException('Pause time option value should be greater than or equal to 0');
         }
-        $memoryLimit = (int)$input->getOption('memory');
+        $memoryLimit = (int) $input->getOption('memory');
         $memoryLimit = $memoryLimit === -1 ? $memoryLimit : $memoryLimit * 1024 * 1024;
         if ($memoryLimit === 0 || $memoryLimit < -1) {
             throw new InvalidArgumentException('Memory limit option value should be greater than 0 or equal to -1');
         }
         if ($memoryLimit > memory_limit_bytes()) {
-            throw new InvalidArgumentException('Memory limit option value should not be greater than "memory_limit" in the php.ini ('.memory_limit().')');
+            throw new InvalidArgumentException('Memory limit option value should not be greater than "memory_limit" in the php.ini (' . memory_limit() . ')');
         }
 
         $timeLimit = $input->getOption('time');
-        $timeLimit = $timeLimit === null ? $timeLimit : (int)$timeLimit;
+        $timeLimit = $timeLimit === null ? null : (int) $timeLimit;
         if ($timeLimit !== null && $timeLimit <= 0) {
             throw new InvalidArgumentException('Time limit option value should be greater than 0');
         }
 
         $iterationsLimit = $input->getOption('iterations');
-        $iterationsLimit = $iterationsLimit === null ? $iterationsLimit : (int)$iterationsLimit;
+        $iterationsLimit = $iterationsLimit === null ? null : (int) $iterationsLimit;
         if ($iterationsLimit !== null && $iterationsLimit <= 0) {
             throw new InvalidArgumentException('Iterations limit option value should be greater than 0');
         }
 
         $schedule = $input->getOption('schedule');
-        $schedule = $schedule === null ? $schedule : CronExpression::factory($schedule);
+        $schedule = $schedule === null ? null : new CronExpression($schedule);
 
         return new ExecutionContext(
-            $input,
-            $output,
-            $pause,
-            $memoryLimit,
-            $timeLimit,
-            $iterationsLimit,
-            $schedule
+            input: $input,
+            output: $output,
+            pause: $pause,
+            memoryLimit: $memoryLimit,
+            timeLimit: $timeLimit,
+            iterationsLimit: $iterationsLimit,
+            schedule: $schedule,
         );
     }
 
@@ -130,7 +128,7 @@ abstract class AbstractDaemonCommand extends Command
 
     private function checkStop(ExecutionContext $context): bool
     {
-        if (extension_loaded('pcntl') ) {
+        if (extension_loaded('pcntl')) {
             if (!function_exists('pcntl_signal_dispatch')) {
                 throw new BadFunctionCallException("Function 'pcntl_signal_dispatch' is referenced in the php.ini 'disable_functions' and can't be called.");
             }

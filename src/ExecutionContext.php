@@ -10,79 +10,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExecutionContext
 {
-    /**
-     * @var InputInterface
-     */
-    private $input;
+    private readonly float $timeStart;
 
-    /**
-     * @var OutputInterface
-     */
-    private $output;
+    private int $totalPause = 0;
 
-    /**
-     * @var int
-     */
-    private $pause = 0;
+    private int $iterations = 0;
 
-    /**
-     * @var int
-     */
-    private $totalPause = 0;
-
-    /**
-     * @var int
-     */
-    private $memoryLimit = -1;
-
-    /**
-     * @var int|null
-     */
-    private $timeLimit;
-
-    /**
-     * @var int|null
-     */
-    private $iterationsLimit;
-
-    /**
-     * @var CronExpression|null
-     */
-    private $schedule;
-
-    /**
-     * @var float
-     */
-    private $timeStart;
-
-    /**
-     * @var int
-     */
-    private $iterations = 0;
-
-    /**
-     * @var bool
-     */
-    private $stopAsap = false;
+    private bool $stopAsap = false;
 
     public function __construct(
-        InputInterface $input,
-        OutputInterface $output,
-        int $pause,
-        int $memoryLimit,
-        ?int $timeLimit,
-        ?int $iterationsLimit,
-        ?CronExpression $schedule = null
+        private readonly InputInterface $input,
+        private readonly OutputInterface $output,
+        private readonly int $pause,
+        private readonly int $memoryLimit,
+        private readonly ?int $timeLimit,
+        private readonly ?int $iterationsLimit,
+        private readonly ?CronExpression $schedule = null,
     ) {
-        $this->input = $input;
-        $this->output = $output;
-
-        $this->pause = $pause;
-        $this->memoryLimit = $memoryLimit;
-        $this->timeLimit = $timeLimit;
-        $this->iterationsLimit = $iterationsLimit;
-        $this->schedule = $schedule;
-
         $this->timeStart = microtime(true);
     }
 
