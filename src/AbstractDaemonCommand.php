@@ -80,7 +80,7 @@ abstract class AbstractDaemonCommand extends Command
     {
         $pause = (int)$input->getOption('pause');
         if ($pause < 0) {
-            throw new InvalidArgumentException('Pause time option value should be greater than 0');
+            throw new InvalidArgumentException('Pause time option value should be greater than or equal to 0');
         }
         $memoryLimit = (int)$input->getOption('memory');
         $memoryLimit = $memoryLimit === -1 ? $memoryLimit : $memoryLimit * 1024 * 1024;
@@ -155,7 +155,7 @@ abstract class AbstractDaemonCommand extends Command
     protected function pause(int $seconds, ExecutionContext $context): void
     {
         if ($seconds < 0) {
-            throw new InvalidArgumentException('Pause time argument value should be greater than 0');
+            throw new InvalidArgumentException('Pause time argument value should be greater than or equal to 0');
         }
         if ($seconds === 0) {
             return;

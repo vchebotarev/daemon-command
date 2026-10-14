@@ -25,11 +25,22 @@
             "Chebur\\DaemonCommand\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Chebur\\DaemonCommand\\Tests\\": "tests/"
+        }
+    },
     "require": {
         "php": "^8.2",
         "chebur/memory-limit-bytes": "^0.1.0",
         "dragonmantank/cron-expression": "^3.0",
         "symfony/console": "^6.4 || ^7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10"
+    },
+    "scripts": {
+        "test": "phpunit"
     },
     "suggest": {
         "ext-pcntl": "*"

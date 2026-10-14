@@ -16,5 +16,13 @@ Create your daemon commands extending AbstractDaemonCommand
 
 ```
 
+## Tests
+Tests run in Docker:
+```bash
+docker compose build php
+docker compose run --rm php composer install
+docker compose run --rm php composer test
+```
+
 ## License
 See [LICENSE](LICENSE).
